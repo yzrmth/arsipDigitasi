@@ -4,26 +4,131 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use App\Models\PetaModel;
+use PhpParser\Node\Expr\Empty_;
 
 class Peta extends BaseController
 {
+    public function __construct()
+    {
+        $this->petaModel = new PetaModel();
+    }
     public function index()
     {
-        $builder = $this->db->table('tb_peta');
-        $query = $builder->get()->getResult();
+        // mengatasi nomor urutan di tabel
+        $currentPage = $this->request->getVar('page_PetaTable')  ? $this->request->getVar('page_PetaTable') : 1;
 
-        $data['peta'] = $query;
+        // Pencarian
+        $keyword = $this->request->getPost('keyword');
+        if ($keyword) {
+            $peta = $this->petaModel->search($keyword);
+        } else {
+            $peta = $this->petaModel;
+        }
+
+        $data = [
+            'title' => 'Rekapitulasi Peta',
+            'peta' => $this->petaModel->paginate(10, 'PetaTable'),
+            'pager' => $this->petaModel->pager,
+            'currentPage' => $currentPage
+        ];
         return view('peta/index', $data);
     }
+
+    public function detil($id)
+    {
+
+        $peta = $this->petaModel->getPeta($id);
+        $data = [
+            'title' => 'Detil Peta',
+            'peta' => $peta
+        ];
+
+        return view('peta/detil', $data);
+    }
+
+    public function formTambah()
+    {
+        $data = [
+            'title' => 'Aplikasi | Formulir Tambah Data',
+            'content_header' => 'Formulir Tambah Data',
+            'validation' => \Config\Services::validation()
+        ];
+
+        return view('peta/formTambah', $data);
+    }
+
+    public function simpan()
+    {
+        $validasi  = \Config\Services::validation();
+        $aturan = [
+            'proyek' => [
+                'label' => 'proyek',
+                'rules' => 'required',
+                'errors' => [
+                    'required' => '{field} wajib diisi',
+                ]
+            ]
+        ];
+
+        $validasi->setRules($aturan);
+
+        if ($validasi->withRequest($this->request)->run()) {
+            $data = [
+                'proyek' => $this->request->getPost('proyek'),
+                'nomor_peta' => $this->request->getPost('nomor_peta'),
+                'tahun' => $this->request->getPost('tahun'),
+                'kecamatan' => $this->request->getPost('kecamatan'),
+                'desa' => $this->request->getPost('desa'),
+                'kondisi_fisik' => $this->request->getPost('kondisi_fisik'),
+            ];
+
+            $this->petaModel->save($data);
+
+            $hasil['sukses'] = 'Data Berhasil disimpan';
+            $hasil['error'] = true;
+        } else {
+            $hasil['sukses'] = false;
+            $hasil['error'] = $validasi->listErrors();
+        }
+
+        return json_encode($hasil);
+    }
+
     public function add()
     {
-        $model = new PetaModel;
-        $builder = $this->db->table('tb_peta');
-        $image = $this->request->getFile('file_foto');
-        $fileName = $image->getClientName();
-        $image->move('uploads/FOTO/');
 
-        $data = array(
+        if (!$this->validate([
+            'kondisi_fisik' => [
+                'rules' => 'required',
+                'error' => [
+                    'require' => '{field} haris diisi.'
+                ]
+            ],
+            'file_foto' => [
+                'rules' => 'is_image[file_foto]|mime_in[file_foto,image/jpeg,image/jpg,image/png,image/JPG]',
+                'error' => [
+                    'is_image' => 'Yang dipiih bukan gambar.',
+                    'mime_in' => 'Yang dipiih bukan gambar.'
+                ]
+            ]
+        ])) {
+
+            return redirect()->to('/Peta/formTambah')->withInput();
+        }
+
+        // AMBIL FILE GAMBAR
+        $file = $this->request->getFile('file_foto');
+
+        // cek apakah user ada menguplaod gambar
+        if ($file->getError() == 4) {
+            $fileName = 'no_image.png';
+        } else {
+            $fileName = $file->getName();
+            $file->move('./uploads/FOTO/');
+        }
+        // dd($file);
+
+        $this->petaModel->save([
             'proyek' => $this->request->getPost('proyek'),
             'nomor_peta' => $this->request->getPost('nomor_peta'),
             'tahun' => $this->request->getPost('tahun'),
@@ -31,99 +136,90 @@ class Peta extends BaseController
             'desa' => $this->request->getPost('desa'),
             'kondisi_fisik' => $this->request->getPost('kondisi_fisik'),
             'file_foto' => $fileName
-        );
+        ]);
 
-        $builder->insert($data);
+        session()->setFlashdata('success', 'Data berhasil disimpan.');
 
-        if ($this->db->affectedRows() > 0) {
-            return redirect()->to(base_url('Peta'))->with('success', 'Data Berhasil Ditambah.');
-        }
+        return redirect()->to('/Peta');
     }
 
-    public function add_dwg($id)
-    {
-        $builder = $this->db->table('tb_peta');
-        $image = $this->request->getFile('file_dwg');
-        $fileName = $image->getClientName();
-        $image->move('uploads/DWG/');
-
-        $data = array(
-            'status' => $this->request->getPost('status'),
-            'file_dwg' => $fileName
-        );
-
-        $this->db->table('tb_peta')->where(['id_peta' => $id])->update($data);
-
-        if ($this->db->affectedRows() > 0) {
-            return redirect()->to(base_url('Peta'))->with('success', 'Data Berhasil Ditambah.');
-        }
-    }
-
-    public function detil($id = null)
+    public function delete($id)
     {
 
-        if ($id != null) {
-            $query = $this->db->table('tb_peta')->getWhere(['id_peta' => $id]);
-            if ($query->resultID->num_rows > 0) {
-                $data['peta'] = $query->getRow();
-                return view('peta/detil', $data);
-            } else {
-                throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
-            }
-        } else {
-            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
-        }
+        $this->petaModel->delete($id);
+
+        session()->setFlashdata('success', 'Data berhasil dihapus.');
+
+        return redirect()->to('/Peta');
     }
 
     public function edit($id)
     {
-        $image = $this->request->getFile('file_foto');
-        $fileName = $image->getClientName();
-        $image->move('uploads/FOTO/');
-
         $data = [
-            'proyek' => $this->request->getVar('proyek'),
-            'nomor_peta' => $this->request->getVar('nomor_peta'),
-            'tahun' => $this->request->getVar('tahun'),
-            'kecamatan' => $this->request->getVar('kecamatan'),
-            'desa' => $this->request->getVar('desa'),
-            'kondisi_fisik' => $this->request->getVar('kondisi_fisik'),
-            'file_foto' => $fileName
+            'title' => 'Aplikasi | Formulir Edit Data',
+            'content_header' => 'Formulir Edit Data',
+            'validation' => \Config\Services::validation(),
+            'peta' => $this->petaModel->getPeta($id)
         ];
 
-        $this->db->table('tb_peta')->where(['id_peta' => $id])->update($data);
-
-        return redirect()->to(base_url('Peta/detil/' . $id))->with('success', 'Data Berhasil Diupdate.');
+        return view('peta/formEdit', $data);
     }
 
-    public function hapus($id)
+    public function update($id)
     {
-        $this->db->table('tb_peta')->where(['id_peta' => $id])->delete();
+        if (!$this->validate([
+            'file_foto' => [
+                'rules' => 'is_image[file_foto]|mime_in[file_foto,image/jpeg,image/jpg,image/png,image/JPG]',
+                'error' => [
+                    'is_image' => 'Yang dipiih bukan gambar.',
+                    'mime_in' => 'Yang dipiih bukan gambar.'
+                ]
+            ]
+        ])) {
 
-        return redirect()->to(base_url('Peta/'))->with('success', 'Data Berhasil Dihapus.');
+            return redirect()->to('/Peta/formEdit' . $this->request->getPost('id_peta'))->withInput();
+        }
+
+        // kelola file
+        $file = $this->request->getFile('file_foto');
+
+        // cek apakah gambar beruba/baru atau tidak
+        if ($file->getError() == 4) {
+            $fileName = $this->request->getPost('file_foto_lama');
+        } else {
+            // generate nama file
+            $fileName = $file->getName();
+
+            // pindahkan file ke folder penyimpanan 
+            $file->move('./uploads/FOTO/', $fileName);
+
+            // hapus file lama
+            // unlink('./uploads/FOTO/'. $this->request->getPost('file_foto_lama'));
+        }
+
+
+        $this->petaModel->save([
+            'id_peta' => $this->request->getPost('id_peta'),
+            'proyek' => $this->request->getPost('proyek'),
+            'nomor_peta' => $this->request->getPost('nomor_peta'),
+            'tahun' => $this->request->getPost('tahun'),
+            'kecamatan' => $this->request->getPost('kecamatan'),
+            'desa' => $this->request->getPost('desa'),
+            'kondisi_fisik' => $this->request->getPost('kondisi_fisik'),
+            'file_foto' => $fileName
+        ]);
+
+        session()->setFlashdata('success', 'Data berhasil diubah.');
+
+        return redirect()->to('/Peta/detil/' . $id);
     }
 
-    public function download_foto($id = null)
+    public function do_download($id)
     {
-        $query = $this->db->table('tb_peta');
-        $data = $query->getWhere(['id_peta' => $id])->getRow();
+        $file = $this->petaModel->find($id);
 
-        return $this->response->download('uploads/FOTO/' . $data->file_foto, null);
-    }
-
-    public function download_dwg($id = null)
-    {
-        $query = $this->db->table('tb_peta');
-        $data = $query->getWhere(['id_peta' => $id])->getRow();
-
-        return $this->response->download('uploads/FOTO/' . $data->file_dwg, null);
-    }
-
-    public function download_shp($id = null)
-    {
-        $query = $this->db->table('tb_peta');
-        $data = $query->getWhere(['id_peta' => $id])->getRow();
-
-        return $this->response->download('uploads/FOTO/' . $data->file_shp, null);
+        $fileName = $file->file_foto;
+        // dd($fileName);
+        return $this->response->download('./uploads/FOTO/' . $fileName, null);
     }
 }

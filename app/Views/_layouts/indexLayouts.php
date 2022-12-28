@@ -43,24 +43,24 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 </div>
             </div>
             <!-- /.content-wrapper -->
-
-            <!-- Control Sidebar -->
-            <aside class="control-sidebar control-sidebar-dark">
-                <!-- Control sidebar content goes here -->
-                <div class="p-3">
-                    <h5>Title</h5>
-                    <p>Sidebar content</p>
-                </div>
-            </aside>
-            <!-- /.control-sidebar -->
-
-            <!-- Main Footer -->
-            <?php include 'footers.php' ?>
         </div>
-        <!-- ./wrapper -->
+        <!-- Control Sidebar -->
+        <aside class="control-sidebar control-sidebar-dark">
+            <!-- Control sidebar content goes here -->
+            <div class="p-3">
+                <h5>Title</h5>
+                <p>Sidebar content</p>
+            </div>
+        </aside>
+        <!-- /.control-sidebar -->
 
-        <!-- REQUIRED SCRIPTS -->
-        <?php include 'script.php' ?>
+        <!-- Main Footer -->
+        <?php include 'footers.php' ?>
+    </div>
+    <!-- ./wrapper -->
+
+    <!-- REQUIRED SCRIPTS -->
+    <?php include 'script.php' ?>
 </body>
 
 </html>

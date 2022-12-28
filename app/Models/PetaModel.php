@@ -14,43 +14,24 @@ class PetaModel extends Model
     protected $returnType       = 'object';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = [];
+    protected $allowedFields    = ['nomor_peta', 'proyek', 'tahun', 'kecamatan', 'desa', 'kondisi_fisik', 'status', 'file_foto', 'file_dwg', 'file_shp'];
 
-    protected $db;
 
-    public function __construct()
+    public function getPeta($id = null)
     {
-        $this->db = db_connect();
+        if ($id == null) {
+            return $this->findAll();
+        }
+        return $this->where(['id_peta' => $id])->first();
     }
 
-    public function get()
-    {
-        //SELECT * FROM video_games_sales LIMIT 20 OFFSET 0
-        $builder = $this->db->table('tb_peta');
-        $query = $builder->get(20, 0);
-        return $query;
-    }
+    // Pencarian Berdasarakan field file_foto
 
-    public function count_data()
+    public function search($keyword)
     {
-        //SELECT * FROM video_games_sales LIMIT 20 OFFSET 0
-        $builder = $this->db->table('tb_peta');
-        $query = $builder->get();
-        return $query;
-    }
-    public function count_terpetakan()
-    {
-        //SELECT * FROM `video_games_sales` WHERE `Publisher` = 'Nintendo'
-        $builder = $this->db->table('tb_peta');
-        $query = $builder->getWhere(['status' => 'Terpetakan']);
-        return $query;
-    }
+        $builder = $this->table('tb_peta');
+        $builder->like('file_foto', $keyword);
 
-    public function count_belum_terpetakan()
-    {
-        //SELECT * FROM `video_games_sales` WHERE `Publisher` = 'Nintendo'
-        $builder = $this->db->table('tb_peta');
-        $query = $builder->getWhere(['status' => 'Belum Terpetakan']);
-        return $query;
+        return $builder;
     }
 }

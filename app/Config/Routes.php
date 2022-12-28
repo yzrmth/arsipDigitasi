@@ -38,9 +38,13 @@ $routes->setAutoRoute(true);
 $routes->get('/', 'Beranda::index');
 $routes->get('Dashboard', 'Dashboard::index');
 $routes->get('Peta', 'Peta::index');
-$routes->put('Peta/edit/(:any)', 'Peta::edit/$1');
-$routes->delete('Peta/hapus/(:any)', 'Peta::hapus/$1');
-$routes->delete('Peta/download_foto/(:any)', 'Peta::download_foto/$1');
+$routes->get('/Peta/(:num)', 'Peta::detil/$1');
+$routes->post('/Peta/add', 'Peta::add');
+$routes->delete('/Peta/(:num)', 'Peta::delete/$1');
+$routes->post('/Peta/edit/(:segment)', 'Peta::edit/$1');
+$routes->post('/Peta/do_download/(:segment)', 'Peta::do)wonload/$1');
+
+// $routes->post('/Peta/update/(:segment)', 'Peta::update/$1');
 
 /*
  * --------------------------------------------------------------------

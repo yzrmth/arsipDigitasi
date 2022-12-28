@@ -18,6 +18,15 @@
 <?= $this->endSection() ?>
 
 <?= $this->section('main-content') ?>
+<?php if (session()->getFlashdata('success')) : ?>
+    <div class="alert alert-success alert-dismissible show fade">
+        <div class="alert-body">
+            <button class="close" data-dismiss="alert">x</button>
+            <b>Sukses !</b>
+            <?= session()->getFlashdata('success') ?>
+        </div>
+    </div>
+<?php endif; ?>
 
 <div class="row">
     <div class="col-md-6">
@@ -30,22 +39,28 @@
                             Deskripsi Peta
                         </h3>
                     </div>
-                    <div class="col-md-4 offset-md-4">
-                        <a class="btn btn-info btn-sm link-light" href="#" data-toggle="modal" data-target="#formEdit">
-                            <i class="fas fa-pencil-alt">
-                            </i>
-                            Edit
-                        </a>
-                        <a class="btn btn-danger btn-sm" href="<?= base_url('Peta/hapus/' . $peta->id_peta) ?>">
-                            <i class="fas fa-trash">
-                            </i>
-                            Hapus
-                        </a>
+                    <div class="col-md-4 offset-md-4 d-grid gap-2 d-md-flex justify-content-md-end">
+                        <form action="<?= base_url('Peta/edit/' . $peta->id_peta) ?>" method="post" class="mr-1">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="_method" value="POST">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-trash"></i>
+                                Edit
+                            </button>
+                        </form>
+                        <form action="<?= base_url('/Peta/' . $peta->id_peta) ?>" method="post">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i>
+                                Delete
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
             <!-- /.card-header -->
-            <div class="card-body">
+            <div class=" card-body">
                 <dl class="row">
                     <dt class="col-sm-4">Proyek</dt>
                     <dd class="col-sm-8"><?= $peta->proyek ?></dd>
@@ -80,7 +95,7 @@
 
                     <dd class="col-sm-8"><?php
                                             if ($peta->file_foto != null) {
-                                                $href = base_url('Peta/download_foto/' . $peta->id_peta);
+                                                $href = base_url('Peta/do_download/' . $peta->id_peta);
                                                 echo  '<a class="btn btn-primary btn-sm link-light float-right" href="' . $href . '">
                                                 <i class="fas fa-download"></i></a>' . $peta->file_foto;
                                             } else {
@@ -92,17 +107,15 @@
                                             ?></dd>
                     <dt class="col-sm-4">File dwg</dt>
                     <dd class="col-sm-8"><?php
-                                            $href = base_url('Peta/download_foto/' . $peta->id_peta);
+                                            $href = base_url('Peta/do_download/' . $peta->id_peta);
                                             if ($peta->file_dwg != null) {
-                                                echo '<a class="btn btn-primary btn-sm link-light float-right" href="' . $href . '">
-                                                <i class="fas fa-download"></i></a>' . $peta->file_dwg;
+                                                echo '<button type="button" class="btn btn-primary float-right" style="margin-right: 5px;">
+                                                <i class="fas fa-download"></i> Download</button>' . $peta->file_dwg;
                                             } else {
                                                 echo '<a class="btn btn-success btn-sm link-light " href="#" data-toggle="modal" data-target="#addDWG">
                                                 <i class="fas fa-plus"></i> 
                                                 add file dwg
-                                            </a>
-                                            <button type="button" class="btn btn-primary float-right" style="margin-right: 5px;">
-                                            <i class="fas fa-download"></i> Download</button>';
+                                            </a>';
                                             }
                                             ?></dd>
                     <dt class="col-sm-4">File shp</dt>
@@ -130,8 +143,6 @@
 
 
 </div>
-
-</div>
 <!-- MOdal Edit -->
 <div class="modal fade" id="formEdit" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
@@ -143,7 +154,7 @@
             <div class="modal-body">
                 <form action="<?= base_url('Peta/edit/' . $peta->id_peta) ?>" method="post" enctype="multipart/form-data">
                     <?= csrf_field() ?>
-                    <input type="hidden" name="_method" value="put">
+                    <input type="hidden" name="id" value="<?= $peta->id_peta ?>">
                     <div class="mb-3">
                         <label for="proyek" class="form-label">Proyek</label>
                         <input type="text" class="form-control" id="proyek" name="proyek" value="<?= $peta->proyek ?>">

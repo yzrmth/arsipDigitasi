@@ -13,7 +13,7 @@
         <!-- small card -->
         <div class="small-box bg-info">
             <div class="inner">
-                <h3><?= $j_data->getNumRows() ?></h3>
+                <h3><?= $j_data ?></h3>
 
                 <p>Scan Peta</p>
             </div>
@@ -47,7 +47,7 @@
         <!-- small card -->
         <div class="small-box bg-warning">
             <div class="inner">
-                <h3><?= $j_terpetakan->getNumRows() ?></h3>
+                <h3><?= $j_terpetakan ?></h3>
 
                 <p>Terpetakan</p>
             </div>
@@ -64,7 +64,7 @@
         <!-- small card -->
         <div class="small-box bg-danger">
             <div class="inner">
-                <h3><?= $j_belum_terpetakan->getNumRows() ?></h3>
+                <h3><?= $j_belum_terpetakan ?></h3>
 
                 <p>Belum Terpetakan</p>
             </div>
