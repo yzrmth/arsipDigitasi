@@ -36,7 +36,7 @@
 
         <?php if ($pager->hasNext()) : ?>
             <li class="page-item">
-                <a class="page-link" href="<?= $pager->getNext() ?>" aria-label="<?= lang('Pager.next') ?>">
+                <a class="page-link" href="<?= $pager->getNextPage() ?>" aria-label="<?= lang('Pager.next') ?>">
                     <span aria-hidden="true"><?= lang('Pager.next') ?></span>
                 </a>
             </li>

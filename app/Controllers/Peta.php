@@ -18,9 +18,12 @@ class Peta extends BaseController
         $currentPage = $this->request->getVar('page_PetaTable')  ? $this->request->getVar('page_PetaTable') : 1;
 
         // Pencarian
-        $keyword = $this->request->getPost('keyword');
-        if ($keyword) {
+        $keyword = $this->request->getVar('keyword');
+        if (isset($keyword)) {
             $peta = $this->petaModel->search($keyword);
+            session()->set('cari', $keyword);
+
+            redirect()->to('/Peta/index');
         } else {
             $peta = $this->petaModel;
         }
@@ -29,8 +32,11 @@ class Peta extends BaseController
             'title' => 'Rekapitulasi Peta',
             'peta' => $this->petaModel->paginate(10, 'PetaTable'),
             'pager' => $this->petaModel->pager,
-            'currentPage' => $currentPage
+            'currentPage' => $currentPage,
+            'keyword' => $keyword
         ];
+
+
         return view('peta/index', $data);
     }
 

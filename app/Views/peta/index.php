@@ -14,28 +14,33 @@
         <!-- Button trigger modal -->
         <div class="row">
             <div class="col">
-
                 <a href="<?= base_url('Peta/formTambah') ?>" class="btn btn-primary" role="button" data-bs-toggle="button">Tambah</a>
             </div>
-
-            <div class="col offset-md-4 d-grid gap-2 d-md-flex justify-content-md-end">
-
+        </div>
+        <div class="row">
+            <div class="col ">
                 <!-- SEARCH by file_foto -->
-                <form class="form-inline ml-3" action="" method="POST">
-                    <div class="input-group input-group-sm">
-                        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" name="keyword">
-                        <div class="input-group-append">
-                            <button class="btn btn-navbar" type="submit" name="submit">
+                <form class="form-inline ml-3 justify-content-center" action="" method="get">
+                    <!-- <div class="input-group mb-3">
+                        <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search" name="keyword" value="<?= $keyword ?>">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-primary" type="submit" name="submit">
+                                <i class="fas fa-search">Cari</i>
+                            </button>
+                        </div>
+                    </div> -->
+                    <div class="input-group mb-3">
+                        <input class="form-control form-control-navbar" type="search" placeholder="Cari Berdasarakan Nama FIle" aria-label="Search" name="keyword" value="<?= $keyword ?>">
+                        <div class="input-group-prepend">
+                            <button type="submit" class="btn btn-primary" name="submit">
                                 <i class="fas fa-search"></i>
+                                Cari
                             </button>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-
-
-
         <!-- /.card-header -->
         <?php if (session()->getFlashdata('success')) : ?>
             <div class="alert alert-success alert-dismissible show fade">
@@ -78,7 +83,12 @@
                     endforeach ?>
                 </tbody>
             </table>
-            <?= $pager->links('PetaTable', 'simple_pagination') ?>
+            <div class="float-right mt-2">
+                <?= $pager->links('PetaTable', 'simple_pagination') ?>
+            </div>
+            <div class="float-left">
+                <i>Showing <?= 1 + (10 * ($currentPage - 1)) ?> to <?= $no - 1 ?> of <?= $pager->getTotal('PetaTable') ?> entries.</i>
+            </div>
         </div>
         <!-- /.card-body -->
     </div>

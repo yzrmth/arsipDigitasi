@@ -27,7 +27,7 @@ class PetaModel extends Model
 
     // Pencarian Berdasarakan field file_foto
 
-    public function search($keyword)
+    public function search($keyword = null)
     {
         $builder = $this->table('tb_peta');
         $builder->like('file_foto', $keyword);
